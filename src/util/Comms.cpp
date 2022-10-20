@@ -1,3 +1,8 @@
+/*
+    This file contains most of the 
+    Communication logic via the LoRa
+*/
+
 #include <Arduino.h>
 #include <SPI.h>
 #include <LoRa.h>

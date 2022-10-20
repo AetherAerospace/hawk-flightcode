@@ -1,4 +1,3 @@
-// base pid settings
 #define PID_SETPOINT 90
 
 /*

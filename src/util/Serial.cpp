@@ -1,3 +1,8 @@
+/*
+    Stuff in here is mostly for prettier
+    serial console logging output
+*/
+
 #include <Arduino.h>
 #include "Serial.h"
 #include "settings/serialSet.h"

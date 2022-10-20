@@ -1,10 +1,12 @@
-#include <Arduino.h>
-#include "PID.h"
-
-/* 
+/*
     Basic PID-Controller
     Inspired by: https://github.com/br3ttb/Arduino-PID-Library
+
+    For a more general idea of how it's used, see the header file
 */
+
+#include <Arduino.h>
+#include "PID.h"
 
 PID::PID(double* Input, double* Output, double* Setpoint) {
     pidOutput = Output;
