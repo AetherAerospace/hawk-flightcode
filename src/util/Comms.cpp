@@ -17,24 +17,25 @@ String LoRaData;
 void onReceive(int packetSize) {
     if (packetSize == 0) return;
 
+    LoRaData = "";
     int recipient = LoRa.read();
     byte sender = LoRa.read();
-    byte incomingMsgId = LoRa.read();
-    byte incomingLength = LoRa.read();
+    int incomingLength = LoRa.read();
 
     while (LoRa.available()) {
         LoRaData += (char)LoRa.read();
     }
 
-    if (incomingLength != LoRaData.length()) {
-        srlInfo("lTRX: Corrupt Packet?");
+    if (recipient != LORA_LOCAL) {
+        srlInfo("lTRX: '" + String(recipient) +  "' -> rogue?");
         return;
     }
 
-    if (recipient != LORA_LOCAL) {
-        srlInfo("lTRX: Rogue Address?");
+    if (incomingLength != LoRaData.length()) {
+        srlInfo("lTRX: '" + String(incomingLength) +  "' -> corrupt?");
         return;
     }
+    srlInfo("lTRX: received '" + String(LoRaData) + "'");
 }
 
 void initLoRa() {
@@ -44,9 +45,11 @@ void initLoRa() {
         srlError("Unable to start lTRX!");
         while (1);
     }
-    LoRa.onReceive(onReceive);
-    LoRa.receive();
     srlInfo("lTRX: Initialized");
+}
+
+void handleLoRa() {
+    onReceive(LoRa.parsePacket());
 }
 
 void sendLoRa(String outgoing) {

@@ -27,4 +27,8 @@ void setup() {
   initLoRa();
 }
 
-void loop() {}
+void loop() {
+  delay(5000);
+  handleLoRa();
+  sendLoRa("Hello World");
+}

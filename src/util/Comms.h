@@ -1,3 +1,4 @@
 void initLoRa();
 void receiveLoRa();
-void sendLora(String messageToSend);
+void sendLoRa(String messageToSend);
+void handleLoRa();
