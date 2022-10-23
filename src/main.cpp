@@ -15,8 +15,9 @@
 */
 
 #include <Arduino.h>
-#include "util/Comms.h"
+#include "util/LoRa.h"
 #include "util/Serial.h"
+#include "proc/lTRX.h"
 
 void setup() {
   // force fastest speed
@@ -27,8 +28,4 @@ void setup() {
   initLoRa();
 }
 
-void loop() {
-  delay(5000);
-  handleLoRa();
-  sendLoRa("Hello World");
-}
+void loop() {}
