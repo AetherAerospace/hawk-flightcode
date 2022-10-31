@@ -27,21 +27,23 @@ void onReceive(int packetSize) {
     }
 
     if (incomingLength != LoRaData.length()) {
-        srlInfo("LoRa", "'" + String(incomingLength) +  "' -> corrupt?");
+        // srlInfo("LoRa", "'" + String(incomingLength) +  "' -> corrupt?");
         return;
     }
 
     if (recipient != LORA_LOCAL) {
-        srlInfo("LoRa", "'" + String(recipient) +  "' -> rogue?");
+        // srlInfo("LoRa", "'" + String(recipient) +  "' -> rogue?");
         return;
     }
 
+    /*
     srlInfo("LoRa", "received '" 
             + String(recipient) + "/"
             + String(sender) + "/"
             + String(incomingLength) + "/"
             + String(LoRaData)
             + "'");
+    */
 
     declTRX(incomingID, LoRaData);
 }
