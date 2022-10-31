@@ -19,7 +19,7 @@ class FlightData {
 // function to write to csv file with a fixed first column. the function has the parameter data. Data is a vector.
 void writeToCSV(std::vector<FlightData> data) {
     std::ofstream file;
-    file.open("telemetry.csv", std::ios::app);
+    file.open("AAE-1 (Hawk) [White].csv", std::ios::app);
     
     //loop through the vector and write to csv file
     for (int i = 0; i < data.size(); i++) {
