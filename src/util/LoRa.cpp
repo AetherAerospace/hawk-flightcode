@@ -21,6 +21,8 @@ void onReceive(int packetSize) {
     byte sender = LoRa.read();
     int incomingLength = LoRa.read();
     int incomingID = LoRa.read();
+    int incomingRSSI = LoRa.packetRssi();
+    int incomingSNR = LoRa.packetSnr();
 
     while (LoRa.available()) {
         LoRaData += (char)LoRa.read();
@@ -45,7 +47,7 @@ void onReceive(int packetSize) {
             + "'");
     */
 
-    declTRX(incomingID, LoRaData);
+    declTRX(incomingID, LoRaData, incomingRSSI, incomingSNR);
 }
 
 void LoRaTXM(){

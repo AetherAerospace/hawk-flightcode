@@ -18,6 +18,55 @@ unsigned int pktCnt = 0;
 int aerMain[3];
 // buttons
 int btnMain[6];
+// packet related data for last
+int lastPacketRSSI = 0;
+int lastPacketSNR = 0;
+// if this is non-zero, the link has problems
+int packetDiff = 0;
+// main lnk array
+int lnkMain[3];
+
+// craft control packets to be handled by receiver
+void craftCTL(int t) {
+    switch (t) {
+        case 12:
+            // Link ACK packet
+            // (PD[val]RS[val]SN[val]Q)
+            sendLoRa(t,
+                "PD" +
+                String(packetDiff) +
+                "RS" +
+                String(lastPacketRSSI) +
+                "SN" +
+                String(lastPacketSNR) +
+                "Q"
+            );
+            ++pktCnt;
+            break;
+    }
+}
+
+// link quality management
+void handleLNK(int t, String d) {
+    switch (t) {
+        case 11:
+            lnkMain[0] = d.substring(2, d.indexOf("RS")).toInt();
+            lnkMain[1] = d.substring((d.indexOf("RS") + 1), d.indexOf("SN")).toInt();
+            lnkMain[2] = d.substring((d.indexOf("SN") + 1), d.indexOf("Q")).toInt();
+            // respond with diff
+            packetDiff = (lnkMain[0] - pktCnt);
+            craftCTL(12);
+            ++pktCnt;
+            srlInfo("lTRX", "pktCnt: "
+                + String(lnkMain[0]) + " RSSI: "
+                + String(lnkMain[1]) + " SNR: "
+                + String(lnkMain[2])
+            );
+            break;
+        case 12:
+            break;
+    }
+}
 
 // parse known control packets
 void handleCTL(int t, String d) {
@@ -28,11 +77,13 @@ void handleCTL(int t, String d) {
             aerMain[1] = d.substring((d.indexOf("E") + 1), d.indexOf("R")).toInt();
             aerMain[2] = d.substring((d.indexOf("R") + 1), d.indexOf("Q")).toInt();
             ++pktCnt;
+            /*
             srlInfo("lTRX", "Ail: "
                 + String(aerMain[0]) + " Elv: "
                 + String(aerMain[1]) + " Rud: "
                 + String(aerMain[2])
             );
+            */
             break;
         case 32:
             // Button Vals ( SR[val]SL[val]Q )
@@ -67,12 +118,14 @@ void handleCTL(int t, String d) {
 }
 
 // decoder function for lTRX packets
-void declTRX(int msgType, String data) {
+void declTRX(int msgType, String data, int pktRS, int pktSNR) {
+    lastPacketRSSI = pktRS;
+    lastPacketSNR = pktSNR;
     switch (msgType) {
-        /*
         case 10 ... 19:
-            // LNK, @TODO, do nothing for now
+            handleLNK(msgType, data);
             break;
+        /*
         case 20 ... 29:
             // GPS, @TODO, do nothing for now
             break;

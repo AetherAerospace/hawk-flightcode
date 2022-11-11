@@ -1,1 +1,2 @@
 #define LTRX_DELAY 50
+#define LNK_PKT_DELAY 24
