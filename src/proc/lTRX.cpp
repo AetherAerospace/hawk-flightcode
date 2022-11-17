@@ -18,6 +18,36 @@ unsigned int pktCnt = 0;
 int aerMain[3];
 // buttons
 int btnMain[6];
+// packet related data for last
+int lastPacketRSSI = 0;
+float lastPacketSNR = 0.0;
+// if this is non-zero, the link has problems
+int packetDiff = 0;
+// remote pkt counter for LQ
+int remotePktCnt = 0;
+
+// link quality management
+void handleLNK(int t, String d) {
+    switch (t) {
+        case 11:
+            remotePktCnt = d.substring(2, d.indexOf("Q")).toInt();
+            ++pktCnt;
+            packetDiff = (remotePktCnt - pktCnt);
+            /*
+            sendLoRa(t,
+                "PD" +
+                String(packetDiff) +
+                "Q"
+            );
+            srlInfo("lTRX", "pktCnt: "
+                + String(lnkMain[0]) + " RSSI: "
+                + String(lnkMain[1]) + " SNR: "
+                + String(lnkMain[2])
+            );
+            */
+            break;
+    }
+}
 
 // parse known control packets
 void handleCTL(int t, String d) {
@@ -28,17 +58,18 @@ void handleCTL(int t, String d) {
             aerMain[1] = d.substring((d.indexOf("E") + 1), d.indexOf("R")).toInt();
             aerMain[2] = d.substring((d.indexOf("R") + 1), d.indexOf("Q")).toInt();
             ++pktCnt;
+            /*
             srlInfo("lTRX", "Ail: "
                 + String(aerMain[0]) + " Elv: "
                 + String(aerMain[1]) + " Rud: "
                 + String(aerMain[2])
             );
+            */
             break;
         case 32:
             // Button Vals ( SR[val]SL[val]Q )
             btnMain[0] = d.substring(2, d.indexOf("SL")).toInt();
             btnMain[1] = d.substring((d.indexOf("SL") + 2), d.indexOf("Q")).toInt();
-            Serial.println(String(d));
             /*
             srlInfo("lTRX", "SR: "
                 + String(btnMain[0]) + " SL "
@@ -67,12 +98,14 @@ void handleCTL(int t, String d) {
 }
 
 // decoder function for lTRX packets
-void declTRX(int msgType, String data) {
+void declTRX(int msgType, String data, int pktRS, float pktSNR) {
+    lastPacketRSSI = pktRS;
+    lastPacketSNR = pktSNR;
     switch (msgType) {
-        /*
         case 10 ... 19:
-            // LNK, @TODO, do nothing for now
+            handleLNK(msgType, data);
             break;
+        /*
         case 20 ... 29:
             // GPS, @TODO, do nothing for now
             break;
