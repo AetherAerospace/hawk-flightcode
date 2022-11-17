@@ -20,50 +20,31 @@ int aerMain[3];
 int btnMain[6];
 // packet related data for last
 int lastPacketRSSI = 0;
-int lastPacketSNR = 0;
+float lastPacketSNR = 0.0;
 // if this is non-zero, the link has problems
 int packetDiff = 0;
-// main lnk array
-int lnkMain[3];
-
-// craft control packets to be handled by receiver
-void craftCTL(int t) {
-    switch (t) {
-        case 12:
-            // Link ACK packet
-            // (PD[val]RS[val]SN[val]Q)
-            sendLoRa(t,
-                "PD" +
-                String(packetDiff) +
-                "RS" +
-                String(lastPacketRSSI) +
-                "SN" +
-                String(lastPacketSNR) +
-                "Q"
-            );
-            ++pktCnt;
-            break;
-    }
-}
+// remote pkt counter for LQ
+int remotePktCnt = 0;
 
 // link quality management
 void handleLNK(int t, String d) {
     switch (t) {
         case 11:
-            lnkMain[0] = d.substring(2, d.indexOf("RS")).toInt();
-            lnkMain[1] = d.substring((d.indexOf("RS") + 1), d.indexOf("SN")).toInt();
-            lnkMain[2] = d.substring((d.indexOf("SN") + 1), d.indexOf("Q")).toInt();
-            // respond with diff
-            packetDiff = (lnkMain[0] - pktCnt);
-            craftCTL(12);
+            remotePktCnt = d.substring(2, d.indexOf("Q")).toInt();
             ++pktCnt;
+            packetDiff = (remotePktCnt - pktCnt);
+            /*
+            sendLoRa(t,
+                "PD" +
+                String(packetDiff) +
+                "Q"
+            );
             srlInfo("lTRX", "pktCnt: "
                 + String(lnkMain[0]) + " RSSI: "
                 + String(lnkMain[1]) + " SNR: "
                 + String(lnkMain[2])
             );
-            break;
-        case 12:
+            */
             break;
     }
 }
@@ -89,7 +70,6 @@ void handleCTL(int t, String d) {
             // Button Vals ( SR[val]SL[val]Q )
             btnMain[0] = d.substring(2, d.indexOf("SL")).toInt();
             btnMain[1] = d.substring((d.indexOf("SL") + 2), d.indexOf("Q")).toInt();
-            Serial.println(String(d));
             /*
             srlInfo("lTRX", "SR: "
                 + String(btnMain[0]) + " SL "
@@ -118,7 +98,7 @@ void handleCTL(int t, String d) {
 }
 
 // decoder function for lTRX packets
-void declTRX(int msgType, String data, int pktRS, int pktSNR) {
+void declTRX(int msgType, String data, int pktRS, float pktSNR) {
     lastPacketRSSI = pktRS;
     lastPacketSNR = pktSNR;
     switch (msgType) {
