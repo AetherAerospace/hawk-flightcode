@@ -121,6 +121,11 @@ int fetchControls(int id) {
     return aerMain[id];
 }
 
+// expose buttons
+int fetchButtons(int id) {
+    return btnMain[id];
+}
+
 // lTRX main control loop
 void lTRXctl() {
     crCL = millis();

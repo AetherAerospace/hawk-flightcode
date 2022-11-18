@@ -17,6 +17,7 @@
 #include <Arduino.h>
 #include "util/LoRa.h"
 #include "util/Serial.h"
+#include "util/Power.h"
 #include "proc/lTRX.h"
 
 void setup() {
@@ -26,6 +27,10 @@ void setup() {
   Serial.begin(115200);
   // start LoRa Link
   initLoRa();
+  // speed controllers
+  initESC();
 }
 
-void loop() {}
+void loop() {
+  loopPower(fetchButtons(0));
+}
