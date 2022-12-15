@@ -16,7 +16,6 @@
 
 //include the libraries
 #include <Arduino.h>
-#include <list>
 
 //get the GPS coordinates from the waypoint
 double waypointLatitude = 46.603463;
@@ -31,13 +30,10 @@ double altitude = 500;
 //get the compass heading from the compass sensor and store it in a variable (use static variable for now)
 long bearing = 0;
 
-//initialize the list to store the distance, distanceLongitude and distanceLatitude
-std::list<long> distanceVector;
-
 //calculate the distance between the drone and the waypoint for longitude and latitude
-void calculateDistance() {
-    long distanceLongitude = waypointLongitude - longitude;
-    long distanceLatitude = waypointLatitude - latitude;
+double calculateDistance(double waypointLong, double waypointLat, double planeLong, double planeLat) {
+    long distanceLongitude = waypointLong - planeLong;
+    long distanceLatitude = waypointLat - planeLat;
     //if the distance is negative, make it positive
     if (distanceLongitude < 0) {
         distanceLongitude = distanceLongitude * -1;
@@ -46,23 +42,18 @@ void calculateDistance() {
         distanceLatitude = distanceLatitude * -1;
     }
 
-    //convert the distance to meters
-    distanceLongitude = distanceLongitude * 111319;
-    distanceLatitude = distanceLatitude * 111319;
+    //convert the distance from degree (wsg84) to meters
+    distanceLongitude = distanceLongitude * 111317;
+    distanceLatitude = distanceLatitude * 111317;
 
     //calculate the distance between the drone and the waypoint
-    long distance = sqrt(pow(distanceLongitude, 2) + pow(distanceLatitude, 2));
-    
-    //convert the distance to meters
-    distance = distance / 1000;
-
-    //store the distance, distanceLongitude and distanceLatitude
-    distanceVector.push_back(distance);
-    distanceVector.push_back(distanceLongitude);
-    distanceVector.push_back(distanceLatitude);
-    
-    //return the vector
-    return;
+    double distance = sqrt(pow(distanceLongitude, 2) + pow(distanceLatitude, 2));
+    //print the distance to the console
+    Serial.print("Distance: ");
+    Serial.print(distance);
+    Serial.println("m");
+    //return the distance
+    return distance;
 };
 
 //calculate the bearing between the drone and the waypoint
