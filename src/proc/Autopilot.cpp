@@ -1,7 +1,7 @@
 /*
-+---------------------- Harald v0.0.1 ----------------------+
++---------------------- Autopilot v0.0.1 -------------------+
 | Author: Maximilian Birnbacher                             |
-| This file contains the code for the autopilot Harald to   |
+| This file contains the code for the autopilot to          |
 | navigate the drone to a given location using GPS          |
 | coordinates and a compass                                 |
 |                                                           |
