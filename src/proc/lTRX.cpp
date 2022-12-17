@@ -10,7 +10,7 @@
 #include "settings/ltrxset.h"
 
 // timeouts for main loop
-unsigned long prCL = 0;
+unsigned long pastMillTRX = 0;
 // keep track of packet count
 unsigned int pktCnt = 0;
 // main ctl array
@@ -20,30 +20,43 @@ int btnMain[2];
 // packet related data for last
 int lastPacketRSSI = 0;
 float lastPacketSNR = 0.0;
-// if this is non-zero, the link has problems
-int packetDiff = 0;
-// remote pkt counter for LQ
-int rmtPktCnt = 0;
+// true when we need to send ACK
+bool isACKLoop = false;
 
-// craft control packets to be handled by receiver
-void lTRXStream() {
-    sendLoRa(2,
-        "RS" +
-        String(lastPacketRSSI) +
-        "Q"
-    );
-    ++pktCnt;
-}
-
-// parse known control packets
+// parse actual packet based on ID
 void handleStream(int t, String d) {
-    // Stick Val ( A[val]E[val]R[val]Q )
-    aerMain[0] = d.substring( 1, d.indexOf("E") ).toInt();
-    aerMain[1] = d.substring( (d.indexOf("E") + 1), d.indexOf("R") ).toInt();
-    aerMain[2] = d.substring( (d.indexOf("R") + 1), d.indexOf("SL") ).toInt();
-    btnMain[0] = d.substring( (d.indexOf("SL") + 2), d.indexOf("SR") ).toInt();
-    btnMain[1] = d.substring( (d.indexOf("SR") + 2), d.indexOf("Q") ).toInt();
-    ++pktCnt;
+    if ( t != 100 ) {
+        /*
+            Data Packet ( 
+                A[val] - Stick Aileron
+                E[val] - Stick Elevator
+                R[val] - Stick Rudder
+                SL[val] - Button Shoulder Left
+                SR[val] - Button Shoulder Right
+                Q - EOF
+            )
+        */
+        /*
+            @TODO:
+            !This needs a little bit of error checking!
+            Even though we verify packet integrity by size in the
+            receive process, we cann't trust data blindly
+        */
+        // parse main control values
+        aerMain[0] = d.substring( 1, d.indexOf("E") ).toInt();
+        aerMain[1] = d.substring( (d.indexOf("E") + 1), d.indexOf("R") ).toInt();
+        aerMain[2] = d.substring( (d.indexOf("R") + 1), d.indexOf("SL") ).toInt();
+        // parse button values
+        btnMain[0] = d.substring( (d.indexOf("SL") + 2), d.indexOf("SR") ).toInt();
+        btnMain[1] = d.substring( (d.indexOf("SR") + 2), d.indexOf("Q") ).toInt();
+        ++pktCnt;
+    } else {
+        // we need to send ACK
+        isACKLoop = true; 
+        // reset packet counter
+        // so next packets will be ACK
+        pktCnt = 0;
+    }
 }
 
 // decoder function for lTRX packets
@@ -53,27 +66,52 @@ void declTRX(int msgType, String data, int pktRS, float pktSNR) {
     handleStream(msgType, data);
 }
 
-// expose controls
-int fetchControls(int id) {
-    return aerMain[id];
-}
+// craft and send return packets
+void lTRXTransmit() {
+    /*
+        Telemetry Packet ( 
+            RS[val] - Last Packet RSSI value
+            Q - EOF
 
-// expose buttons
-int fetchButtons(int id) {
-    return btnMain[id];
+            @TODO: add GPS and other stuff here
+
+        )
+    */
+    sendLoRa(200,
+        "RS" +
+        String(lastPacketRSSI) +
+        "Q"
+    );
+    ++pktCnt;
 }
 
 // lTRX main control loop
 void lTRXctl() {
-    // send response after delay
-    if (millis() - prCL > LTRX_DELAY) {
-        // set transmit
-        LoRaTXM();
-        // telemetry response
-        lTRXStream();
-        prCL = millis();
-        // set receive
+    if (millis() - pastMillTRX > LTRX_DELAY) {
+        if ( 
+            !isACKLoop  ||
+            pktCnt > LTRX_ACK_PACKETS
+        ) {
+            // assume ack loop done
+            isACKLoop = false;
+            // recieving
+            LoRaRXM();
+        } else {
+            // set transmit
+            LoRaTXM();
+            // send ACK packet with telemetry
+            lTRXTransmit();
+        }
+        pastMillTRX = millis();
     } else return;
-    // recieving
-    LoRaRXM();
+}
+
+// expose controls
+int getControls(int id) {
+    return aerMain[id];
+}
+
+// expose buttons
+int getButtons(int id) {
+    return btnMain[id];
 }
