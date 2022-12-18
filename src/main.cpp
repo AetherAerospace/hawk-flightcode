@@ -32,5 +32,8 @@ void setup() {
 }
 
 void loop() {
-  loopPower(fetchButtons(0));
+  // power handling
+  loopPower(getButtons(0));
+  // LoRa control loop
+  lTRXctl();
 }

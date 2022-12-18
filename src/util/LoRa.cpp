@@ -36,7 +36,7 @@ void onReceive(int packetSize) {
         return;
     }
 
-    /*
+    #ifdef LORA_RX_LOGGING
     srlInfo("LoRa", "received '" 
             + String(recipient) + "/"
             + String(sender) + "/"
@@ -44,7 +44,7 @@ void onReceive(int packetSize) {
             + String(incomingID) + "/"
             + String(LoRaData)
             + "'");
-    */
+    #endif
 
     declTRX(incomingID, LoRaData, incomingRSSI, incomingSNR);
 }
@@ -58,7 +58,6 @@ void LoRaRXM(){
 }
 
 void sendLoRa(int type, String outgoing) {
-    LoRaTXM();
     LoRa.beginPacket();
     LoRa.write(LORA_DEST);
     LoRa.write(LORA_LOCAL);
@@ -66,17 +65,25 @@ void sendLoRa(int type, String outgoing) {
     LoRa.write(type);
     LoRa.print(outgoing);
     LoRa.endPacket();
-    LoRaRXM();
+
+    #ifdef LORA_TX_LOGGING
+    srlInfo("LoRa", "sent '" 
+            + String(LORA_DEST) + "/"
+            + String(LORA_LOCAL) + "/"
+            + String(outgoing.length()) + "/"
+            + String(type) + "/"
+            + String(outgoing)
+            + "'");
+    #endif
 }
 
 void initLoRa() {
     SPI.begin(SCK, MISO, MOSI, SS);
     LoRa.setPins(SS, RST, DIO0);
     if (!LoRa.begin(BAND)) {
-        srlError("LoRa", "Unable to start!");
+        srlError("LoRa", "Failed");
         while (1);
     }
     LoRa.onReceive(onReceive);
-    LoRaRXM();
     srlInfo("LoRa", "Initialized");
 }
