@@ -19,6 +19,7 @@
 #include "util/Serial.h"
 #include "util/Power.h"
 #include "proc/lTRX.h"
+#include "proc/pidKal.h"
 
 void setup() {
   // force fastest speed
