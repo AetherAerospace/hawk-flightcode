@@ -1,2 +1,4 @@
-#define SERVO_ROLL_OFFSET 0.00
-#define SERVO_PITCH_OFFSET 0.00
+// pins
+#define SERVO_AIL 12
+#define SERVO_ELV 13
+#define SERVO_RUD 15
