@@ -10,7 +10,6 @@
 #include "LoRa.h"
 #include "proc/lTRX.h"
 #include "util/Serial.h"
-#include "pins/loraPins.h"
 #include "settings/loraSet.h"
 
 void onReceive(int packetSize) {

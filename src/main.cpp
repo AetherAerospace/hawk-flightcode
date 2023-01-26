@@ -6,8 +6,6 @@
   ├─ main.cpp
   ├─ settings/
   │  ├─ header files with settings for other code modules
-  ├─ pin/
-  │  ├─ contains header files with pin definitions
   ├─ proc/
   │  ├─ contains the more code heavy processing stuff and modules
   ├─ util/
@@ -17,7 +15,8 @@
 #include <Arduino.h>
 #include "util/LoRa.h"
 #include "util/Serial.h"
-#include "util/Power.h"
+#include "proc/Power.h"
+#include "proc/Servo.h"
 #include "proc/lTRX.h"
 #include "proc/pidKal.h"
 
@@ -30,11 +29,15 @@ void setup() {
   initLoRa();
   // speed controllers
   initESC();
+  // axis servos
+  initServo();
 }
 
 void loop() {
   // power handling
-  loopPower(getButtons(0));
+  powerctl(getButtons(0));
+  // servo handling
+  servoctl(getControls(0), getControls(1), getControls(2));
   // LoRa control loop
   lTRXctl();
 }
