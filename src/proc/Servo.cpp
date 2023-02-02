@@ -27,9 +27,9 @@ void initServo() {
 // keep servos up to date
 void servoctl(int aileron, int elevator, int rudder) {
 	// convert to correct vals
-	int actAilVal = map(aileron, 0, 255, 0, 180);
-	int actElvVal = map(elevator, 0, 255, 0, 180);
-	int actRudVal = map(rudder, 0, 255, 0, 180);
+	int actAilVal = map(aileron, -128, 128, 0, 180);
+	int actElvVal = map(elevator, -128, 128, 0, 180);
+	int actRudVal = map(rudder, -128, 128, 0, 180);
 	// write to servos
 	srvAil.write(actAilVal);
 	srvElv.write(actElvVal);
