@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <ESP32Servo.h>
 #include "Power.h"
+#include "settings/escSet.h"
 
 // ESCs
 Servo ESC1;
@@ -12,8 +13,8 @@ long interval = 50;
 float value = 0;
 
 void initESC() {
-	ESC1.attach(13, 1000, 2000);
-	ESC2.attach(12, 1000, 2000);
+	ESC1.attach(ESC_1, 1000, 2000);
+	ESC2.attach(ESC_2, 1000, 2000);
 	// give a second for initial
 	delay(1000);
 	// make sure we set both ESC's to zero

@@ -31,8 +31,8 @@ void handleStream(int t, String d) {
                 A[val] - Stick Aileron
                 E[val] - Stick Elevator
                 R[val] - Stick Rudder
-                SL[val] - Button Shoulder Left
-                SR[val] - Button Shoulder Right
+                SR[val] - Button Shoulder Left
+                SL[val] - Button Shoulder Right
                 Q - EOF
             )
         */
@@ -45,10 +45,10 @@ void handleStream(int t, String d) {
         // parse main control values
         aerMain[0] = d.substring( 1, d.indexOf("E") ).toInt();
         aerMain[1] = d.substring( (d.indexOf("E") + 1), d.indexOf("R") ).toInt();
-        aerMain[2] = d.substring( (d.indexOf("R") + 1), d.indexOf("SL") ).toInt();
+        aerMain[2] = d.substring( (d.indexOf("R") + 1), d.indexOf("SR") ).toInt();
         // parse button values
-        btnMain[0] = d.substring( (d.indexOf("SL") + 2), d.indexOf("SR") ).toInt();
-        btnMain[1] = d.substring( (d.indexOf("SR") + 2), d.indexOf("Q") ).toInt();
+        btnMain[0] = d.substring( (d.indexOf("SR") + 2), d.indexOf("SL") ).toInt();
+        btnMain[1] = d.substring( (d.indexOf("SL") + 2), d.indexOf("Q") ).toInt();
         ++pktCnt;
     } else {
         // we need to send ACK
